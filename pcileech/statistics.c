@@ -68,7 +68,7 @@ VOID _PageStatShowUpdate(_Inout_ PPAGE_STATISTICS ps)
 
         }
         else {
-            ps->opn(ps->cPageSuccess, ps->cPageFail, ps->cPageTotal);
+            ps->opn(ps->cPageSuccess, ps->cPageFail, ps->cPageTotal, qwSpeed);
         }
         printf(
             " Current Action: %s                             \n" \

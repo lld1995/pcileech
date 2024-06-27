@@ -9,7 +9,7 @@
 #define __PCILEECH_H__
 #include <leechcore.h>
 
-typedef void (*OnProgressNotify)(QWORD success, QWORD fail, QWORD total);
+typedef void (*OnProgressNotify)(QWORD success, QWORD fail, QWORD total, QWORD speed);
 
 #ifdef _WIN32
 typedef unsigned __int64                    QWORD, *PQWORD;

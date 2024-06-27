@@ -29,10 +29,11 @@ int StartDump(OnProgressNotify opn,const char* outPath) {
     ctxMain->cfg.fOutFile = TRUE;
     ctxMain->cfg.fUserInteract = TRUE;
 
-
-	ctxMain->cfg.fVerbose = TRUE;
-	ctxMain->cfg.fVerboseExtra = TRUE;
-	ctxMain->cfg.fVerboseExtraTlp = TRUE;
+#if _DEBUG
+    ctxMain->cfg.fVerbose = TRUE;
+    ctxMain->cfg.fVerboseExtra = TRUE;
+    ctxMain->cfg.fVerboseExtraTlp = TRUE;
+#endif
 
     strcpy_s(ctxMain->cfg.szDevice, MAX_PATH, "FPGA");
     if (outPath == NULL) {

@@ -15,8 +15,8 @@
     <LocalDebuggerCommandArguments>-device pmem -remote rpc://frizk@ad.frizk.net:localhost display -min 0x1000</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DebuggerFlavor>WindowsRemoteDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>wx64_pscmd -kmd 0x7ffff000  -device rawudp://10.9.0.175 -v -vv</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>-device FPGA -v -vv -vvv dump</LocalDebuggerCommandArguments>
     <RemoteDebuggerCommand>\\ad.frizk.net\data\dev-pcileech\bin\pcileech.exe</RemoteDebuggerCommand>
     <RemoteDebuggerCommandArguments>pcileech -device fpga -v  -vv -vvv -min 0x1000 display</RemoteDebuggerCommandArguments>
     <RemoteDebuggerWorkingDirectory>\\ad.frizk.net\data\dev-pcileech\bin\</RemoteDebuggerWorkingDirectory>

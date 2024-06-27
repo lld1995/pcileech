@@ -36,6 +36,8 @@ typedef struct tdMEMDUMP_FILEWRITE {
     MEMDUMP_FILEWRITE_DATA Data[MEMDUMP_NUM_BUFFER];
 } MEMDUMP_FILEWRITE, *PMEMDUMP_FILEWRITE;
 
+PMEMDUMP_FILEWRITE pfw = NULL;
+
 VOID MemoryDump_SetOutFileName()
 {
     SYSTEMTIME st;
@@ -91,7 +93,7 @@ PMEMDUMP_FILEWRITE MemoryDump_File_Initialize(_In_ BOOL fAllocFile4GB)
 {
     FILE *hFileTMP;
     HANDLE hThread;
-    PMEMDUMP_FILEWRITE pfw;
+    //PMEMDUMP_FILEWRITE pfw;
     MemoryDump_SetOutFileName();
     if(!(pfw = LocalAlloc(LMEM_ZEROINIT, sizeof(MEMDUMP_FILEWRITE)))) {
         printf("Memory Dump: Failed. Out of memory.\n");
@@ -141,18 +143,18 @@ fail:
 *      in 16MB chunks.
 * If the mode is USB3380 native a failed read for 16MB will stop the dumping.
 */
-VOID ActionMemoryDump_KMD_USB3380()
+VOID ActionMemoryDump_KMD_USB3380(OnProgressNotify opn)
 {
     BOOL fPartialSuccess;
     QWORD paCurrent, paMin, paMax;
     PMEMDUMP_FILEWRITE_DATA pd;
-    PMEMDUMP_FILEWRITE pfw = NULL;
+    //PMEMDUMP_FILEWRITE pfw = NULL;
     PPAGE_STATISTICS pStat = NULL;
     // 1: Initialize result file, buffers and statistics:
     paMin = ctxMain->cfg.paAddrMin & ~0xfff;
     paMax = (ctxMain->cfg.paAddrMax + 1) & ~0xfff;
     if(!(pfw = MemoryDump_File_Initialize(FALSE))) { return; }
-    PageStatInitialize(&pStat, paMin, paMax, "Dumping Memory", ctxMain->phKMD ? TRUE : FALSE, ctxMain->cfg.fVerbose);
+    PageStatInitialize(&pStat, paMin, paMax, "Dumping Memory", ctxMain->phKMD ? TRUE : FALSE, ctxMain->cfg.fVerbose,opn);
     // 2: Dump memory in 16MB blocks:
     paCurrent = paMin;
     PageStatUpdate(pStat, paCurrent, 0, 0);
@@ -188,19 +190,19 @@ fail:
 * hitting problematic PCIe memory mapped devices between 3-4GB which commonly
 * crashes computer when read ...
 */
-VOID ActionMemoryDump_Native()
+VOID ActionMemoryDump_Native(OnProgressNotify opn)
 {
     BOOL fSaferDump;
     QWORD paCurrent, paMin, paMax;
     PMEMDUMP_FILEWRITE_DATA pd;
-    PMEMDUMP_FILEWRITE pfw = NULL;
+    //PMEMDUMP_FILEWRITE pfw = NULL;
     PPAGE_STATISTICS pStat = NULL;
     // 1: Initialize result file, buffers and statistics:
     paMin = ctxMain->cfg.paAddrMin & ~0xfff;
     paMax = (ctxMain->cfg.paAddrMax + 1) & ~0xfff;
     fSaferDump = PCILEECH_DEVICE_EQUALS("fpga") && (paMin == 0) && (paMax > MEMDUMP_4GB);
     if(!(pfw = MemoryDump_File_Initialize(fSaferDump))) { return; }
-    PageStatInitialize(&pStat, paMin, paMax, "Dumping Memory", FALSE, ctxMain->cfg.fVerbose);
+    PageStatInitialize(&pStat, paMin, paMax, "Dumping Memory", FALSE, ctxMain->cfg.fVerbose,opn);
     // 2: Dump memory in 16MB blocks:
     paCurrent = fSaferDump ? MEMDUMP_4GB : paMin;
     PageStatUpdate(pStat, paCurrent, 0, 0);
@@ -236,12 +238,21 @@ VOID ActionMemoryDump_Native()
     MemoryDump_File_Close(pfw);
 }
 
-VOID ActionMemoryDump()
+VOID ActionMemoryDump(OnProgressNotify opn)
 {
     if(ctxMain->phKMD || PCILEECH_DEVICE_EQUALS("usb3380")) {
-        ActionMemoryDump_KMD_USB3380();
+        ActionMemoryDump_KMD_USB3380(opn);
     } else {
-        ActionMemoryDump_Native();
+        ActionMemoryDump_Native(opn);
+    }
+}
+
+VOID StopMemoryDump() {
+    if (pfw == NULL) {
+
+    }
+    else {
+        pfw->fValid = FALSE;
     }
 }
 
@@ -259,7 +270,7 @@ VOID ActionMemoryProbe()
     printf("WARNING: 'probe' may cause the device to stop working until a reboot on AMD or\n");
     printf("         Thunderbolt systems and is discouraged. See link for additional info:\n");
     printf("         https://github.com/ufrisk/LeechCore/wiki/Device_FPGA_AMD_Thunderbolt \n\n");
-    PageStatInitialize(&pPageStat, ctxMain->cfg.paAddrMin, ctxMain->cfg.paAddrMax, "Probing Memory", FALSE, TRUE);
+    PageStatInitialize(&pPageStat, ctxMain->cfg.paAddrMin, ctxMain->cfg.paAddrMax, "Probing Memory", FALSE, TRUE, NULL);
     while(pa < ctxMain->cfg.paAddrMax) {
         cPages = (DWORD)min(MEMORY_PROBE_PAGES_PER_SWEEP, (ctxMain->cfg.paAddrMax - pa) / 0x1000);
         if(!LcCommand(ctxMain->hLC, LC_CMD_FPGA_PROBE | cPages, sizeof(QWORD), (PBYTE)&pa, &pbProbeResultMap, &cbProbeResultMap) || (cPages > cbProbeResultMap)) {

@@ -94,7 +94,7 @@ BOOL KMD_FindSignature1(_Inout_ PSIGNATURE pSignatures, _In_ DWORD cSignatures, 
     if(!(pbBuffer8M = LocalAlloc(0, 0x800000))) { goto cleanup; }
     // loop kmd-find
     qwAddrMax = min(ctxMain->cfg.paAddrMax, ctxMain->dev.paMax);
-    if(!PageStatInitialize(&pPageStat, qwAddrCurrent, qwAddrMax, "Searching for KMD location", FALSE, FALSE)) { goto cleanup; }
+    if(!PageStatInitialize(&pPageStat, qwAddrCurrent, qwAddrMax, "Searching for KMD location", FALSE, FALSE,NULL)) { goto cleanup; }
     while(qwAddrCurrent < qwAddrMax) {
         pPageStat->qwAddr = qwAddrCurrent;
         if(DeviceReadDMA(qwAddrCurrent, 0x800000, pbBuffer8M, pPageStat)) {
@@ -141,7 +141,7 @@ BOOL KMD_FindSignature_EfiRuntimeServices(_Out_ PQWORD pqwAddrPhys)
         ctxMain->cfg.paAddrMax = 0x100000000;
     }
     qwCurrentAddress = ctxMain->cfg.paAddrMin;
-    if(!PageStatInitialize(&pPageStat, ctxMain->cfg.paAddrMin, ctxMain->cfg.paAddrMax, "Searching for EFI Runtime Services", ctxMain->phKMD ? TRUE : FALSE, ctxMain->cfg.fVerbose)) { goto cleanup; }
+    if(!PageStatInitialize(&pPageStat, ctxMain->cfg.paAddrMin, ctxMain->cfg.paAddrMax, "Searching for EFI Runtime Services", ctxMain->phKMD ? TRUE : FALSE, ctxMain->cfg.fVerbose, NULL)) { goto cleanup; }
     while(qwCurrentAddress < ctxMain->cfg.paAddrMax) {
         result = Util_Read16M(pbBuffer16M, qwCurrentAddress, pPageStat);
         if(!result && !ctxMain->cfg.fForceRW && !ctxMain->phKMD) {
@@ -465,7 +465,7 @@ QWORD KMD_Linux48KernelBaseSeek()
     memset(pbCMP00, 0x00, 0x100);
     qwA = max(0x01000000, ctxMain->cfg.paAddrMin) & 0xffffffffffe00000;
     qwAddrMax = max(0x01000000, (ctxMain->dev.paMax - 0x01000000) & 0xffffffffffe00000);
-    if(!PageStatInitialize(&pPageStat, qwA, qwAddrMax, "Scanning for Linux kernel base", FALSE, FALSE)) { return 0; }
+    if(!PageStatInitialize(&pPageStat, qwA, qwAddrMax, "Scanning for Linux kernel base", FALSE, FALSE, NULL)) { return 0; }
     // Linux kernel uses 2MB pages. Base of kernel is assumed to have AuthenticAMD and GenuineIntel strings
     // in first page. First page should also end with at least 0x400 0x90's. 2nd page (hypercall page?) is
     // assumed to end with 0x100 0x00's.
@@ -542,7 +542,7 @@ BOOL KMD_Linux48KernelSeekSignature(_Out_ PSIGNATURE pSignature)
     paKernelBase = KMD_Linux48KernelBaseSeek();
     if(!paKernelBase) { goto fail; }
     printf("\n");
-    if(!PageStatInitialize(&pPageStat, paKernelBase, paKernelBase + KMD_LINUX48SEEK_MAX_BYTES, "Verifying Linux kernel base", FALSE, FALSE)) { goto fail; }
+    if(!PageStatInitialize(&pPageStat, paKernelBase, paKernelBase + KMD_LINUX48SEEK_MAX_BYTES, "Verifying Linux kernel base", FALSE, FALSE, NULL)) { goto fail; }
     PageStatUpdate(pPageStat, paKernelBase, 0, 0);
     DeviceReadDMA(paKernelBase, KMD_LINUX48SEEK_MAX_BYTES, pb, pPageStat);
     KMD_LinuxFindFunctionAddr(pb, KMD_LINUX48SEEK_MAX_BYTES, ks, 4);
@@ -692,7 +692,7 @@ BOOL KMDOpen_UEFI_FindEfiBase()
     if(!(pb = LocalAlloc(0, 0x00100000))) { goto fail; }
     dwAddrCurrent = SIZE_PAGE_ALIGN_4K(ctxMain->cfg.paAddrMin);
     dwAddrMax = max(0xffffffff, SIZE_PAGE_ALIGN_4K(ctxMain->cfg.paAddrMax) - 1);
-    if(!PageStatInitialize(&pPageStat, dwAddrCurrent, dwAddrMax, "Searching for EFI BASE", FALSE, FALSE)) { goto fail; }
+    if(!PageStatInitialize(&pPageStat, dwAddrCurrent, dwAddrMax, "Searching for EFI BASE", FALSE, FALSE, NULL)) { goto fail; }
     // loop EFI BASE (IBI SYST) find
     while(dwAddrCurrent <= dwAddrMax - 0x100000) {
         if(DeviceReadDMA(dwAddrCurrent, 0x100000, pb, pPageStat)) {

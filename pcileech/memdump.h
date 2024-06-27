@@ -7,12 +7,14 @@
 #define __MEMDUMP_H__
 #include "pcileech.h"
 
+VOID StopMemoryDump();
+
 /*
 * Dump physical memory to file. The USB3380 card may only dump the lower 4GB
 * in default DMA mode due to hardware limitations. If a kernel module (KMD) is
 * inserted in the target computer OS kernel all memory may be dumped.
 */
-VOID ActionMemoryDump();
+VOID ActionMemoryDump(OnProgressNotify opn);
 
 /*
 * Probe readable physical memory (for reading). The resulting memory map is

@@ -40,6 +40,7 @@
     <ClInclude Include="ob\ob.h" />
     <ClInclude Include="oscompatibility.h" />
     <ClInclude Include="pcileech.h" />
+    <ClInclude Include="pcileechlib.h" />
     <ClInclude Include="shellcode.h" />
     <ClInclude Include="statistics.h" />
     <ClInclude Include="umd.h" />
@@ -63,6 +64,7 @@
     <ClCompile Include="ob\ob_set.c" />
     <ClCompile Include="oscompatibility.c" />
     <ClCompile Include="pcileech.c" />
+    <ClCompile Include="pcileechlib.cpp" />
     <ClCompile Include="statistics.c" />
     <ClCompile Include="umd.c" />
     <ClCompile Include="util.c" />
@@ -77,7 +79,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -158,6 +160,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalOptions>/D WIN32 %(AdditionalOptions)</AdditionalOptions>
       <CompileAs>CompileAsC</CompileAs>
+      <PreprocessorDefinitions>PCILEECHLIB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <FullProgramDatabaseFile>

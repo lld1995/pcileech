@@ -34,6 +34,7 @@ typedef struct tdPAGE_STATISTICS {
     BOOL fKMD;
     LPSTR szAction;
     STATISTICS_INTERNAL i;
+    OnProgressNotify opn;
 } PAGE_STATISTICS, *PPAGE_STATISTICS;
 
 typedef struct tdSTATISTICS_SEARCH {
@@ -54,7 +55,7 @@ typedef struct tdSTATISTICS_SEARCH {
 * -- return
 */
 _Success_(return)
-BOOL PageStatInitialize(_Out_ PPAGE_STATISTICS *ppPageStat, _In_ QWORD qwAddrBase, _In_ QWORD qwAddrMax, _In_ LPSTR szAction, _In_ BOOL fKMD, _In_ BOOL fMemMap);
+BOOL PageStatInitialize(_Out_ PPAGE_STATISTICS *ppPageStat, _In_ QWORD qwAddrBase, _In_ QWORD qwAddrMax, _In_ LPSTR szAction, _In_ BOOL fKMD, _In_ BOOL fMemMap, OnProgressNotify opn);
 
 /*
 * Do one last update of the on-screen page statistics, display the read memory map if

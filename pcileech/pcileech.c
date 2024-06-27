@@ -15,7 +15,6 @@
 #include "umd.h"
 #include "vfs.h"
 #include "vmmx.h"
-
 PPCILEECH_CONTEXT ctxMain = NULL;
 
 BOOL PCILeechConfigIntialize(_In_ DWORD argc, _In_ char* argv[])
@@ -383,7 +382,7 @@ int main(_In_ int argc, _In_ char* argv[])
             Action_Benchmark();
             break;
         case DUMP:
-            ActionMemoryDump();
+            ActionMemoryDump(NULL);
             break;
         case WRITE:
             ActionMemoryWrite();

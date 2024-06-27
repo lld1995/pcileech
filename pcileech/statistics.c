@@ -64,6 +64,12 @@ VOID _PageStatShowUpdate(_Inout_ PPAGE_STATISTICS ps)
         _PageStatPrintMemMap(ps);
     }
     if(ps->cPageTotal < 0x0000000fffffffff) {
+        if (ps->opn == NULL) {
+
+        }
+        else {
+            ps->opn(ps->cPageSuccess, ps->cPageFail, ps->cPageTotal);
+        }
         printf(
             " Current Action: %s                             \n" \
             " Access Mode:    %s                             \n" \
@@ -137,11 +143,12 @@ VOID PageStatClose(_In_opt_ PPAGE_STATISTICS *ppPageStat)
 }
 
 _Success_(return)
-BOOL PageStatInitialize(_Out_ PPAGE_STATISTICS *ppPageStat, _In_ QWORD qwAddrBase, _In_ QWORD qwAddrMax, _In_ LPSTR szAction, _In_ BOOL fKMD, _In_ BOOL fMemMap)
+BOOL PageStatInitialize(_Out_ PPAGE_STATISTICS *ppPageStat, _In_ QWORD qwAddrBase, _In_ QWORD qwAddrMax, _In_ LPSTR szAction, _In_ BOOL fKMD, _In_ BOOL fMemMap, OnProgressNotify opn)
 {
     PPAGE_STATISTICS ps;
     ps = *ppPageStat = LocalAlloc(LMEM_ZEROINIT, sizeof(PAGE_STATISTICS));
     if(!ps) { return FALSE; }
+    ps->opn = opn;
     ps->qwAddr = qwAddrBase;
     ps->cPageTotal = (qwAddrMax - qwAddrBase + 1) / 4096;
     ps->szAction = szAction;

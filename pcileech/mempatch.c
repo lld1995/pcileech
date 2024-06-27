@@ -106,7 +106,7 @@ VOID ActionPatchAndSearchPhysical()
         }
     }
     // loop patch / unlock
-    PageStatInitialize(&pPageStat, qwAddrBase, ctxMain->cfg.paAddrMax, isModePatch ? "Patching" : "Searching", ctxMain->phKMD ? TRUE : FALSE, ctxMain->cfg.fVerbose);
+    PageStatInitialize(&pPageStat, qwAddrBase, ctxMain->cfg.paAddrMax, isModePatch ? "Patching" : "Searching", ctxMain->phKMD ? TRUE : FALSE, ctxMain->cfg.fVerbose, NULL);
     for(; qwAddrBase < ctxMain->cfg.paAddrMax; qwAddrBase += 0x01000000) {
         result = Util_Read16M(pbBuffer16M, qwAddrBase, pPageStat);
         if(!result && !ctxMain->cfg.fForceRW && !ctxMain->phKMD && PCILEECH_DEVICE_EQUALS("usb3380")) {
@@ -260,12 +260,12 @@ VOID ActionPatchAndSearchVirtual()
     ctxs.cSearch = ctxi.cSignatures;
     ctxs.vaMin = ctxMain->cfg.vaAddrMin;
     ctxs.vaMax = ctxMain->cfg.vaAddrMax;
-    ctxs.pSearch = LocalAlloc(LMEM_ZEROINIT, ctxs.cSearch * sizeof(VMMDLL_MEM_SEARCH_CONTEXT_SEARCHENTRY));
+    /*ctxs.pSearch = LocalAlloc(LMEM_ZEROINIT, ctxs.cSearch * sizeof(VMMDLL_MEM_SEARCH_CONTEXT_SEARCHENTRY));
     if(!ctxs.pSearch) { goto cleanup; }
     for(i = 0; i < ctxi.cSignatures; i++) {
         ctxs.pSearch[i].cb = min(ctxi.pSignatures[i].chunk[0].cb, sizeof(ctxs.pSearch[i].pb));
         memcpy(ctxs.pSearch[i].pb, ctxi.pSignatures[i].chunk[0].pb, ctxs.pSearch[i].cb);
-    }
+    }*/
     ctxs.pvUserPtrOpt = &ctxi;
     ctxs.pfnResultOptCB = ActionPatchAndSearchVirtual_ResultCB;
     
@@ -283,5 +283,5 @@ cleanup:
         printf("%s: Failed. No signature found.\n", ctxi.szAction);
     }
     LocalFree(ctxi.pSignatures);
-    LocalFree(ctxs.pSearch);
+    //LocalFree(ctxs.pSearch);
 }

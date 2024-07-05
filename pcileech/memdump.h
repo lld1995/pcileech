@@ -14,7 +14,7 @@ VOID StopMemoryDump();
 * in default DMA mode due to hardware limitations. If a kernel module (KMD) is
 * inserted in the target computer OS kernel all memory may be dumped.
 */
-VOID ActionMemoryDump(OnProgressNotify opn);
+VOID ActionMemoryDump(OnProgressNotify opn, BOOL only700);
 
 /*
 * Probe readable physical memory (for reading). The resulting memory map is

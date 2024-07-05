@@ -382,7 +382,7 @@ int main(_In_ int argc, _In_ char* argv[])
             Action_Benchmark();
             break;
         case DUMP:
-            ActionMemoryDump(NULL);
+            ActionMemoryDump(NULL,FALSE);
             break;
         case WRITE:
             ActionMemoryWrite();

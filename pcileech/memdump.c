@@ -190,7 +190,7 @@ fail:
 * hitting problematic PCIe memory mapped devices between 3-4GB which commonly
 * crashes computer when read ...
 */
-VOID ActionMemoryDump_Native(OnProgressNotify opn)
+VOID ActionMemoryDump_Native(OnProgressNotify opn, BOOL only700)
 {
     BOOL fSaferDump;
     QWORD paCurrent, paMin, paMax;
@@ -206,6 +206,11 @@ VOID ActionMemoryDump_Native(OnProgressNotify opn)
     // 2: Dump memory in 16MB blocks:
     paCurrent = fSaferDump ? MEMDUMP_4GB : paMin;
     PageStatUpdate(pStat, paCurrent, 0, 0);
+
+    QWORD firstStopAddr = MEMDUMP_4GB;
+    if (only700) {
+        firstStopAddr = 0x70000000;
+    }
     while(!pfw->fTerminated) {
         if(!pfw->fFileNone && (pfw->iWrite >= pfw->iRead + 3)) {
             Sleep(25);
@@ -226,7 +231,8 @@ VOID ActionMemoryDump_Native(OnProgressNotify opn)
             }
             break;
         }
-        if(fSaferDump && (MEMDUMP_4GB == pd->pa + pd->cb)) {
+        //if(fSaferDump && (MEMDUMP_4GB == pd->pa + pd->cb)) {
+        if(fSaferDump && (firstStopAddr == pd->pa + pd->cb)) {
             break;
         }
         paCurrent += pd->cb;
@@ -238,12 +244,12 @@ VOID ActionMemoryDump_Native(OnProgressNotify opn)
     MemoryDump_File_Close(pfw);
 }
 
-VOID ActionMemoryDump(OnProgressNotify opn)
+VOID ActionMemoryDump(OnProgressNotify opn ,BOOL only700)
 {
     if(ctxMain->phKMD || PCILEECH_DEVICE_EQUALS("usb3380")) {
         ActionMemoryDump_KMD_USB3380(opn);
     } else {
-        ActionMemoryDump_Native(opn);
+        ActionMemoryDump_Native(opn, only700);
     }
 }
 

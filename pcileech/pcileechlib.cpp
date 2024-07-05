@@ -17,7 +17,7 @@ void StopDump() {
     StopMemoryDump();
 }
 
-int StartDump(OnProgressNotify opn,const char* outPath) {
+int StartDump(OnProgressNotify opn,const char* outPath,int only700, QWORD pmax) {
     ctxMain = LocalAlloc(LMEM_ZEROINIT, sizeof(PCILEECH_CONTEXT));
     if (!ctxMain) {
         return 1;
@@ -25,16 +25,17 @@ int StartDump(OnProgressNotify opn,const char* outPath) {
     ctxMain->magic = PCILEECH_CONTEXT_MAGIC;
     ctxMain->version = PCILEECH_CONTEXT_VERSION;
     ctxMain->cfg.tpAction = DUMP;
-    ctxMain->cfg.paAddrMax = 0;
+    ctxMain->cfg.paAddrMax = pmax;
     ctxMain->cfg.fOutFile = TRUE;
-    ctxMain->cfg.fUserInteract = TRUE;
-
+    ctxMain->cfg.fUserInteract = FALSE;
+    ctxMain->cfg.fPageTableScan = TRUE;//just used in kmd?
+    ctxMain->cfg.fBarZeroReadWrite = TRUE;
+    ctxMain->cfg.fForceRW = TRUE;
 #if _DEBUG
     ctxMain->cfg.fVerbose = TRUE;
     ctxMain->cfg.fVerboseExtra = TRUE;
     ctxMain->cfg.fVerboseExtraTlp = TRUE;
 #endif
-
     strcpy_s(ctxMain->cfg.szDevice, MAX_PATH, "FPGA");
     if (outPath == NULL) {
 
@@ -119,11 +120,15 @@ int StartDump(OnProgressNotify opn,const char* outPath) {
     }
     if (ctxMain->cfg.paAddrMax == 0) {
         LcGetOption(ctxMain->hLC, LC_OPT_CORE_ADDR_MAX, &ctxMain->cfg.paAddrMax);
+        printf("paAddrMax:%llu\n", ctxMain->cfg.paAddrMax);
+    }
+    else {
+        printf("!paAddrMax:%llu\n", ctxMain->cfg.paAddrMax);
     }
     // enable ctrl+c event handler if remote (to circumvent blocking thread)
     PCILeechCtrlHandlerInitialize();
 
-    ActionMemoryDump(opn);
+    ActionMemoryDump(opn, only700);
 
     if (ctxMain && ctxMain->phKMD && (ctxMain->cfg.tpAction != KMDLOAD) && !ctxMain->cfg.fAddrKMDSetByArgument) {
         KMDUnload();
